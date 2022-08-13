@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 )
@@ -30,7 +31,7 @@ func getEnvValue(v string) string {
 }
 
 func main() {
-	CurrentDir = getEnvValue("DIR")
+	CurrentDir, _ = filepath.Abs(filepath.Dir(getEnvValue("DIR")))
 	flag.StringVar(&URL, "url", "", "")
 	flag.Parse()
 	if URL == "" {
