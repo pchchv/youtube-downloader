@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -97,5 +99,24 @@ func (v *Video) parseVidoInfo() error {
 		log.Printf("Stream found: quality '%s', format '%s'", stream_qry["quality"][0], stream_qry["type"][0])
 	}
 	v.streamList = streams
+	return nil
+}
+
+func (v *Video) getVideoInfo() error {
+	url := "http://youtube.com/get_video_info?video_id=" + v.Id
+	log.Printf("url: %s/n", url)
+	res, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return err
+	}
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	v.Info = string(body)
 	return nil
 }
