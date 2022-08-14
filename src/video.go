@@ -18,7 +18,7 @@ type stream map[string]string
 type Video struct {
 	Id         string
 	Info       string
-	streamList []stream
+	StreamList []stream
 }
 
 func NewVideo() *Video {
@@ -43,7 +43,7 @@ func (v *Video) DecodeURL(url string) error {
 
 func (v *Video) Download(dstDir string) {
 	//download highest resolution on [0]
-	targetStream := v.streamList[0]
+	targetStream := v.StreamList[0]
 	url := targetStream["url"] + "&signature=" + targetStream["sig"]
 	log.Println("Download url=" + url)
 	targetFile := fmt.Sprintf("%s/%s.%s", dstDir, targetStream["title"], "mp4")
@@ -126,7 +126,7 @@ func (v *Video) parseVidoInfo() error {
 		streams = append(streams, stream)
 		log.Printf("Stream found: quality '%s', format '%s'", stream_qry["quality"][0], stream_qry["type"][0])
 	}
-	v.streamList = streams
+	v.StreamList = streams
 	return nil
 }
 
