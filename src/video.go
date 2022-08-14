@@ -41,6 +41,16 @@ func (v *Video) DecodeURL(url string) error {
 	return nil
 }
 
+func (v *Video) Download(dstDir string) {
+	//download highest resolution on [0]
+	targetStream := v.streamList[0]
+	url := targetStream["url"] + "&signature=" + targetStream["sig"]
+	log.Println("Download url=" + url)
+	targetFile := fmt.Sprintf("%s/%s.%s", dstDir, targetStream["title"], "mp4")
+	log.Println("Download to file=", targetFile)
+	videoDownloadWorker(targetFile, url)
+}
+
 func (v *Video) findVideoId(url string) error {
 	var videoId string
 	if strings.Contains(url, "youtu") || strings.ContainsAny(url, "\"?&/<%=") {
