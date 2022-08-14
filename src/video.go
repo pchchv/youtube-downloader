@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 )
@@ -135,4 +137,22 @@ func (v *Video) getVideoInfo() error {
 	}
 	v.Info = string(body)
 	return nil
+}
+
+func videoDownloadWorker(destFile string, target string) {
+	res, err := http.Get(target)
+	if err != nil {
+		log.Printf("Http.Get\nerror: %s\ntarget: %s\n", err, target)
+		return
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		log.Printf("reading answer: non 200 status code received: '%s'", err)
+	}
+	out, err := os.Create(destFile)
+	_, err = io.Copy(out, res.Body)
+	if err != nil {
+		log.Println("download video error: ", err)
+		return
+	}
 }
