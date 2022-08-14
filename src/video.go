@@ -52,17 +52,16 @@ func (v *Video) Download(dstDir string) {
 }
 
 func (v *Video) findVideoId(url string) error {
-	// TODO: Need fix! Gets the wrong id.
-	var videoId string
-	if strings.Contains(url, "youtu") || strings.ContainsAny(url, "\"?&/<%=") {
+	videoId := url
+	if strings.Contains(videoId, "youtu") || strings.ContainsAny(url, "\"?&/<%=") {
 		re_list := []*regexp.Regexp{
 			regexp.MustCompile(`(?:v|embed|watch\?v)(?:=|/)([^"&?/=%]{11})`),
 			regexp.MustCompile(`(?:=|/)([^"&?/=%]{11})`),
 			regexp.MustCompile(`([^"&?/=%]{11})`),
 		}
 		for _, re := range re_list {
-			if is_match := re.MatchString(url); is_match {
-				subs := re.FindStringSubmatch(url)
+			if is_match := re.MatchString(videoId); is_match {
+				subs := re.FindStringSubmatch(videoId)
 				videoId = subs[1]
 			}
 		}
@@ -133,7 +132,7 @@ func (v *Video) parseVidoInfo() error {
 
 func (v *Video) getVideoInfo() error {
 	url := "http://youtube.com/get_video_info?video_id=" + v.Id
-	log.Printf("url: %s/n", url)
+	log.Printf("url: %s", url)
 	res, err := http.Get(url)
 	if err != nil {
 		return err
