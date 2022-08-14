@@ -52,6 +52,7 @@ func (v *Video) Download(dstDir string) {
 }
 
 func (v *Video) findVideoId(url string) error {
+	// TODO: Need fix! Gets the wrong id.
 	var videoId string
 	if strings.Contains(url, "youtu") || strings.ContainsAny(url, "\"?&/<%=") {
 		re_list := []*regexp.Regexp{
