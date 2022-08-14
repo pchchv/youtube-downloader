@@ -108,7 +108,7 @@ func (v *Video) parseVidoInfo() error {
 	for stream_pos, stream_raw := range streams_list {
 		stream_qry, err := url.ParseQuery(stream_raw)
 		if err != nil {
-			fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", stream_pos, err)
+			log.Println(fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", stream_pos, err))
 			continue
 		}
 		var sig string
