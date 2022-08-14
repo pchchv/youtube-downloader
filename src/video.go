@@ -23,6 +23,22 @@ func NewVideo() *Video {
 	return new(Video)
 }
 
+func (v *Video) DecodeURL(url string) error {
+	err := v.findVideoId(url)
+	if err != nil {
+		return fmt.Errorf("findvideoID error=%s", err)
+	}
+	err = v.getVideoInfo()
+	if err != nil {
+		return fmt.Errorf("getVideoInfo error=%s", err)
+	}
+	err = v.parseVidoInfo()
+	if err != nil {
+		return fmt.Errorf("parse video info failed, err=%s", err)
+	}
+	return nil
+}
+
 func (v *Video) findVideoId(url string) error {
 	var videoId string
 	if strings.Contains(url, "youtu") || strings.ContainsAny(url, "\"?&/<%=") {
@@ -62,13 +78,13 @@ func (v *Video) parseVidoInfo() error {
 	if status[0] == "fail" {
 		reason, ok := answer["reason"]
 		if ok {
-			return errors.New(fmt.Sprintf("'fail' response status found in the server's answer, reason: %s" + reason[0]))
+			return fmt.Errorf("'fail' response status found in the server's answer, reason: %s" + reason[0])
 		} else {
 			return errors.New("'fail' response status found in the server's answer, no reason given")
 		}
 	}
 	if status[0] != "ok" {
-		return errors.New(fmt.Sprintf("non-success response status found in the server's answer (status: '%s')", status))
+		return fmt.Errorf("non-success response status found in the server's answer (status: '%s')", status)
 	}
 	// Read the sreams map
 	stream_map, ok := answer["url_encoded_fmt_stream_map"]
@@ -80,7 +96,7 @@ func (v *Video) parseVidoInfo() error {
 	for stream_pos, stream_raw := range streams_list {
 		stream_qry, err := url.ParseQuery(stream_raw)
 		if err != nil {
-			log.Println(fmt.Sprintf("An error occured while decoding one of the video's stream's information: stream %d: %s", stream_pos, err))
+			fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", stream_pos, err)
 			continue
 		}
 		var sig string
