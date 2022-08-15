@@ -39,6 +39,9 @@ func main() {
 		log.Panicln("ERROR! Wrong URL!")
 	}
 	v := NewVideo()
-	v.DecodeURL(URL)
+	err := v.DecodeURL(URL)
+	if err != nil {
+		log.Panic(err)
+	}
 	v.Download(CurrentDir)
 }
