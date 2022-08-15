@@ -38,7 +38,7 @@ func main() {
 	if URL == "" {
 		log.Panicln("ERROR! Wrong URL!")
 	}
-	v := NewVideo()
+	v := NewVideo(true)
 	err := v.DecodeURL(URL)
 	if err != nil {
 		log.Panic(err)

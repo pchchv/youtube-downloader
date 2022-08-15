@@ -13,13 +13,18 @@ import (
 	"strings"
 )
 
-func NewVideo() *Video {
-	return new(Video)
+func SetLogOutput(w io.Writer) {
+	log.SetOutput(w)
+}
+
+func NewVideo(debug bool) *Video {
+	return &Video{Debug: debug, DownloadPercent: make(chan int64, 100)}
 }
 
 type stream map[string]string
 
 type Video struct {
+	Debug             bool
 	Id                string
 	Info              string
 	StreamList        []stream
@@ -49,9 +54,9 @@ func (v *Video) Download(dstDir string) {
 	//download highest resolution on [0]
 	targetStream := v.StreamList[0]
 	url := targetStream["url"] + "&signature=" + targetStream["sig"]
-	log.Println("Download url = " + url)
+	v.log("Download url = " + url)
 	targetFile := fmt.Sprintf("%s/%s.%s", dstDir, targetStream["title"], "mp4")
-	log.Println("Download to file=", targetFile)
+	v.log(fmt.Sprintf("Download to file=", targetFile))
 	videoDownloadWorker(targetFile, url)
 }
 
@@ -128,7 +133,7 @@ func (v *Video) parseVidoInfo() error {
 			"author":  answer["author"][0],
 		}
 		streams = append(streams, stream)
-		log.Printf("Stream found: quality '%s', format '%s'", stream_qry["quality"][0], stream_qry["type"][0])
+		v.log(fmt.Sprintf("Stream found: quality '%s', format '%s'", stream_qry["quality"][0], stream_qry["type"][0]))
 	}
 	v.StreamList = streams
 	return nil
@@ -136,7 +141,7 @@ func (v *Video) parseVidoInfo() error {
 
 func (v *Video) getVideoInfo() error {
 	url := "http://youtube.com/get_video_info?video_id=" + v.Id
-	log.Printf("url: %s", url)
+	v.log(fmt.Sprintf("url: %s", url))
 	res, err := http.Get(url)
 	if err != nil {
 		return err
@@ -179,5 +184,11 @@ func videoDownloadWorker(destFile string, target string) {
 	if err != nil {
 		log.Println("download video error: ", err)
 		return
+	}
+}
+
+func (v *Video) log(logText string) {
+	if v.Debug {
+		log.Println(logText)
 	}
 }
