@@ -56,7 +56,7 @@ func (v *Video) Download(dstDir string) {
 	url := targetStream["url"] + "&signature=" + targetStream["sig"]
 	v.log("Download url = " + url)
 	targetFile := fmt.Sprintf("%s/%s.%s", dstDir, targetStream["title"], "mp4")
-	v.log(fmt.Sprintf("Download to file=", targetFile))
+	v.log(fmt.Sprintf("Download to file=%s", targetFile))
 	videoDownloadWorker(targetFile, url)
 }
 
