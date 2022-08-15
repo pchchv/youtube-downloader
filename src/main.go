@@ -11,7 +11,7 @@ import (
 
 var (
 	URL        string
-	CurrentDir string
+	currentDir string
 )
 
 func init() {
@@ -31,19 +31,23 @@ func getEnvValue(v string) string {
 }
 
 func main() {
-	CurrentDir, _ = filepath.Abs(filepath.Dir(getEnvValue("DIR")))
-	log.Println("Download to dir =", CurrentDir)
+	var err error
+	currentDir, err = filepath.Abs(filepath.Dir(getEnvValue("DIR")))
+	if err != nil {
+		log.Panic(err)
+	}
+	log.Println("Download to dir =", currentDir)
 	flag.StringVar(&URL, "url", "", "")
 	flag.Parse()
 	if URL == "" {
 		log.Panicln("ERROR! Wrong URL!")
 	}
 	v := NewVideo(true)
-	err := v.DecodeURL(URL)
+	err = v.DecodeURL(URL)
 	if err != nil {
 		log.Panic(err)
 	}
-	err = v.Download(CurrentDir)
+	err = v.Download(currentDir)
 	if err != nil {
 		log.Panic(err)
 	}
