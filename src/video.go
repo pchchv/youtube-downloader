@@ -27,12 +27,12 @@ type stream map[string]string
 type Video struct {
 	Debug             bool
 	Id                string
-	Info              string
+	info              string
 	StreamList        []stream
 	DownloadPercent   chan int64
-	ContentLength     float64
-	TotalWrittenBytes float64
-	DownloadLevel     float64
+	contentLength     float64
+	totalWrittenBytes float64
+	downloadLevel     float64
 }
 
 func (v *Video) DecodeURL(url string) error {
@@ -92,7 +92,7 @@ func (v *Video) findVideoId(url string) error {
 
 func (v *Video) parseVidoInfo() error {
 	var streams []stream
-	answer, err := url.ParseQuery(v.Info) // ERROR: Empty answer!
+	answer, err := url.ParseQuery(v.info) // ERROR: Empty answer!
 	if err != nil {
 		return err
 	}
@@ -158,17 +158,17 @@ func (v *Video) getVideoInfo() error {
 	if err != nil {
 		return err
 	}
-	v.Info = string(body)
+	v.info = string(body)
 	return nil
 }
 
 func (v *Video) Write(p []byte) (n int, err error) {
 	n = len(p)
-	v.TotalWrittenBytes += float64(n)
-	currentPercent := (v.TotalWrittenBytes / v.ContentLength) * 100
-	if v.DownloadLevel <= currentPercent && v.DownloadLevel < 100 {
-		v.DownloadLevel++
-		v.DownloadPercent <- int64(v.DownloadLevel)
+	v.totalWrittenBytes += float64(n)
+	currentPercent := (v.totalWrittenBytes / v.contentLength) * 100
+	if v.downloadLevel <= currentPercent && v.downloadLevel < 100 {
+		v.downloadLevel++
+		v.DownloadPercent <- int64(v.downloadLevel)
 	}
 	return
 }
@@ -180,7 +180,7 @@ func (v *Video) videoDownloadWorker(dstFile string, target string) error {
 		return err
 	}
 	defer res.Body.Close()
-	v.ContentLength = float64(res.ContentLength)
+	v.contentLength = float64(res.ContentLength)
 	if res.StatusCode != http.StatusOK {
 		log.Printf("reading answer: non 200[code=%v] status code received: '%s'", res.StatusCode, err)
 		return errors.New("non 200 status code received")
