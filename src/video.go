@@ -79,10 +79,11 @@ func (v *Video) findVideoId(url string) error {
 
 func (v *Video) parseVidoInfo() error {
 	var streams []stream
-	answer, err := url.ParseQuery(v.Info)
+	answer, err := url.ParseQuery(v.Info) // ERROR: Empty answer!
 	if err != nil {
 		return err
 	}
+	log.Println(answer)
 	status, ok := answer["status"]
 	if !ok {
 		return errors.New("No response status found in the server's answer")
