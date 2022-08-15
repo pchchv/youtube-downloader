@@ -65,26 +65,26 @@ func (v *Video) Download(dstDir string) error {
 }
 
 func (v *Video) findVideoId(url string) error {
-	videoId := url
-	if strings.Contains(videoId, "youtu") || strings.ContainsAny(url, "\"?&/<%=") {
+	id := url
+	if strings.Contains(id, "youtu") || strings.ContainsAny(id, "\"?&/<%=") {
 		re_list := []*regexp.Regexp{
 			regexp.MustCompile(`(?:v|embed|watch\?v)(?:=|/)([^"&?/=%]{11})`),
 			regexp.MustCompile(`(?:=|/)([^"&?/=%]{11})`),
 			regexp.MustCompile(`([^"&?/=%]{11})`),
 		}
 		for _, re := range re_list {
-			if is_match := re.MatchString(videoId); is_match {
-				subs := re.FindStringSubmatch(videoId)
-				videoId = subs[1]
+			if is_match := re.MatchString(id); is_match {
+				subs := re.FindStringSubmatch(id)
+				id = subs[1]
 			}
 		}
 	}
-	log.Println("Found video id — " + videoId)
-	v.Id = videoId
-	if strings.ContainsAny(videoId, "?&/<%=") {
+	log.Println("Found video id — " + id)
+	v.Id = id
+	if strings.ContainsAny(id, "?&/<%=") {
 		return errors.New("invalid characters in video id")
 	}
-	if len(videoId) < 10 {
+	if len(id) < 10 {
 		return errors.New("the video id must be at least 10 characters long")
 	}
 	return nil
