@@ -20,9 +20,13 @@ func NewVideo() *Video {
 type stream map[string]string
 
 type Video struct {
-	Id         string
-	Info       string
-	StreamList []stream
+	Id                string
+	Info              string
+	StreamList        []stream
+	DownloadPercent   chan int64
+	ContentLength     float64
+	TotalWrittenBytes float64
+	DownloadLevel     float64
 }
 
 func (v *Video) DecodeURL(url string) error {
@@ -83,7 +87,6 @@ func (v *Video) parseVidoInfo() error {
 	if err != nil {
 		return err
 	}
-	log.Println(answer)
 	status, ok := answer["status"]
 	if !ok {
 		return errors.New("No response status found in the server's answer")
