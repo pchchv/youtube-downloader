@@ -51,13 +51,13 @@ func (v *Video) DecodeURL(url string) error {
 	return nil
 }
 
-func (v *Video) Download(dstDir string) error {
+func (v *Video) Download(destDir string) error {
 	//download highest resolution on [0]
 	targetStream := v.StreamList[0]
 	url := targetStream["url"] + "&signature=" + targetStream["sig"]
 	v.log("Download url = " + url)
-	v.log(fmt.Sprintf("Download to file=%s", dstDir))
-	err := v.videoDownloadWorker(dstDir, url)
+	v.log(fmt.Sprintf("Download to file=%s", destDir))
+	err := v.videoDownloadWorker(destDir, url)
 	if err != nil {
 		return err
 	}
@@ -67,13 +67,13 @@ func (v *Video) Download(dstDir string) error {
 func (v *Video) findVideoId(url string) error {
 	id := url
 	if strings.Contains(id, "youtu") || strings.ContainsAny(id, "\"?&/<%=") {
-		re_list := []*regexp.Regexp{
+		reList := []*regexp.Regexp{
 			regexp.MustCompile(`(?:v|embed|watch\?v)(?:=|/)([^"&?/=%]{11})`),
 			regexp.MustCompile(`(?:=|/)([^"&?/=%]{11})`),
 			regexp.MustCompile(`([^"&?/=%]{11})`),
 		}
-		for _, re := range re_list {
-			if is_match := re.MatchString(id); is_match {
+		for _, re := range reList {
+			if isMatch := re.MatchString(id); isMatch {
 				subs := re.FindStringSubmatch(id)
 				id = subs[1]
 			}
@@ -112,32 +112,32 @@ func (v *Video) parseVidoInfo() error {
 		return fmt.Errorf("non-success response status found in the server's answer (status: '%s')", status)
 	}
 	// Read the sreams map
-	stream_map, ok := answer["url_encoded_fmt_stream_map"]
+	streamMap, ok := answer["url_encoded_fmt_stream_map"]
 	if !ok {
 		return errors.New("no stream map found in the server's answer")
 	}
 	// Read each stream
-	streams_list := strings.Split(stream_map[0], ",")
-	for stream_pos, stream_raw := range streams_list {
-		stream_qry, err := url.ParseQuery(stream_raw)
+	streamsList := strings.Split(streamMap[0], ",")
+	for streamPos, streamRaw := range streamsList {
+		streamQry, err := url.ParseQuery(streamRaw)
 		if err != nil {
-			log.Println(fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", stream_pos, err))
+			log.Println(fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", streamPos, err))
 			continue
 		}
 		var sig string
-		if _, exist := stream_qry["sig"]; exist {
-			sig = stream_qry["sig"][0]
+		if _, exist := streamQry["sig"]; exist {
+			sig = streamQry["sig"][0]
 		}
 		stream := stream{
-			"quality": stream_qry["quality"][0],
-			"type":    stream_qry["type"][0],
-			"url":     stream_qry["url"][0],
+			"quality": streamQry["quality"][0],
+			"type":    streamQry["type"][0],
+			"url":     streamQry["url"][0],
 			"sig":     sig,
 			"title":   answer["title"][0],
 			"author":  answer["author"][0],
 		}
 		streams = append(streams, stream)
-		v.log(fmt.Sprintf("Stream found: quality '%s', format '%s'", stream_qry["quality"][0], stream_qry["type"][0]))
+		v.log(fmt.Sprintf("Stream found: quality '%s', format '%s'", streamQry["quality"][0], streamQry["type"][0]))
 	}
 	v.StreamList = streams
 	return nil
