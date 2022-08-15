@@ -40,7 +40,7 @@ func main() {
 	flag.StringVar(&URL, "url", "", "")
 	flag.Parse()
 	if URL == "" {
-		log.Panicln("ERROR! Wrong URL!")
+		log.Panic("ERROR! Wrong URL!")
 	}
 	v := NewVideo(true)
 	err = v.DecodeURL(URL)
