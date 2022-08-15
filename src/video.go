@@ -13,16 +13,16 @@ import (
 	"strings"
 )
 
+func NewVideo() *Video {
+	return new(Video)
+}
+
 type stream map[string]string
 
 type Video struct {
 	Id         string
 	Info       string
 	StreamList []stream
-}
-
-func NewVideo() *Video {
-	return new(Video)
 }
 
 func (v *Video) DecodeURL(url string) error {
@@ -45,7 +45,7 @@ func (v *Video) Download(dstDir string) {
 	//download highest resolution on [0]
 	targetStream := v.StreamList[0]
 	url := targetStream["url"] + "&signature=" + targetStream["sig"]
-	log.Println("Download url=" + url)
+	log.Println("Download url = " + url)
 	targetFile := fmt.Sprintf("%s/%s.%s", dstDir, targetStream["title"], "mp4")
 	log.Println("Download to file=", targetFile)
 	videoDownloadWorker(targetFile, url)
@@ -79,7 +79,7 @@ func (v *Video) findVideoId(url string) error {
 
 func (v *Video) parseVidoInfo() error {
 	var streams []stream
-	answer, err := url.ParseQuery(v.Id)
+	answer, err := url.ParseQuery(v.Info)
 	if err != nil {
 		return err
 	}

@@ -32,7 +32,7 @@ func getEnvValue(v string) string {
 
 func main() {
 	CurrentDir, _ = filepath.Abs(filepath.Dir(getEnvValue("DIR")))
-	log.Println("Download to dir=", CurrentDir)
+	log.Println("Download to dir =", CurrentDir)
 	flag.StringVar(&URL, "url", "", "")
 	flag.Parse()
 	if URL == "" {
