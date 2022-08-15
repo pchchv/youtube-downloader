@@ -43,5 +43,8 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	v.Download(CurrentDir)
+	err = v.Download(CurrentDir)
+	if err != nil {
+		log.Panic(err)
+	}
 }

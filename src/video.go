@@ -53,15 +53,18 @@ func (v *Video) DecodeURL(url string) error {
 
 func (v *Video) Download(destDir string) error {
 	//download highest resolution on [0]
-	targetStream := v.StreamList[0]
-	url := targetStream["url"] + "&signature=" + targetStream["sig"]
-	v.log("Download url = " + url)
-	v.log(fmt.Sprintf("Download to file=%s", destDir))
-	err := v.videoDownloadWorker(destDir, url)
-	if err != nil {
-		return err
+	destFile := filepath.Join(destDir, v.StreamList[0]["title"])
+	var err error
+	for _, val := range v.StreamList {
+		url := val["url"] + "&signature=" + val["sig"]
+		v.log(fmt.Sprintln("Download url=", url))
+		v.log(fmt.Sprintln("Download to file=", destFile))
+		err = v.videoDownloadWorker(destFile, url)
+		if err == nil {
+			break
+		}
 	}
-	return nil
+	return err
 }
 
 func (v *Video) findVideoId(url string) error {
