@@ -153,6 +153,17 @@ func (v *Video) getVideoInfo() error {
 	return nil
 }
 
+func (v *Video) Write(p []byte) (n int, err error) {
+	n = len(p)
+	v.TotalWrittenBytes += float64(n)
+	currentPercent := (v.TotalWrittenBytes / v.ContentLength) * 100
+	if v.DownloadLevel <= currentPercent && v.DownloadLevel < 100 {
+		v.DownloadLevel++
+		v.DownloadPercent <- int64(v.DownloadLevel)
+	}
+	return
+}
+
 func videoDownloadWorker(destFile string, target string) {
 	res, err := http.Get(target)
 	if err != nil {
