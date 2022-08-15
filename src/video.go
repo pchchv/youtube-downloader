@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -50,14 +51,17 @@ func (v *Video) DecodeURL(url string) error {
 	return nil
 }
 
-func (v *Video) Download(dstDir string) {
+func (v *Video) Download(dstDir string) error {
 	//download highest resolution on [0]
 	targetStream := v.StreamList[0]
 	url := targetStream["url"] + "&signature=" + targetStream["sig"]
 	v.log("Download url = " + url)
-	targetFile := fmt.Sprintf("%s/%s.%s", dstDir, targetStream["title"], "mp4")
-	v.log(fmt.Sprintf("Download to file=%s", targetFile))
-	videoDownloadWorker(targetFile, url)
+	v.log(fmt.Sprintf("Download to file=%s", dstDir))
+	err := v.videoDownloadWorker(dstDir, url)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (v *Video) findVideoId(url string) error {
@@ -169,22 +173,33 @@ func (v *Video) Write(p []byte) (n int, err error) {
 	return
 }
 
-func videoDownloadWorker(destFile string, target string) {
+func (v *Video) videoDownloadWorker(dstFile string, target string) error {
 	res, err := http.Get(target)
 	if err != nil {
 		log.Printf("Http.Get\nerror: %s\ntarget: %s\n", err, target)
-		return
+		return err
 	}
 	defer res.Body.Close()
+	v.ContentLength = float64(res.ContentLength)
 	if res.StatusCode != http.StatusOK {
-		log.Printf("reading answer: non 200 status code received: '%s'", err)
+		log.Printf("reading answer: non 200[code=%v] status code received: '%s'", res.StatusCode, err)
+		return errors.New("non 200 status code received")
 	}
-	out, err := os.Create(destFile)
-	_, err = io.Copy(out, res.Body)
+	err = os.MkdirAll(filepath.Dir(dstFile), 666)
+	if err != nil {
+		return err
+	}
+	out, err := os.Create(dstFile)
+	if err != nil {
+		return err
+	}
+	mw := io.MultiWriter(out, v)
+	_, err = io.Copy(mw, res.Body)
 	if err != nil {
 		log.Println("download video error: ", err)
-		return
+		return err
 	}
+	return nil
 }
 
 func (v *Video) log(logText string) {
