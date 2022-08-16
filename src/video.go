@@ -216,15 +216,19 @@ func (v *Video) getHTTPClient() (*http.Client, error) {
 }
 
 func (v *Video) videoDownloadWorker(destFile string, target string) error {
-	res, err := http.Get(target)
+	httpClient, err := v.getHTTPClient()
+	if err != nil {
+		return err
+	}
+	resp, err := httpClient.Get(target)
 	if err != nil {
 		log.Printf("Http.Get\nerror: %s\ntarget: %s\n", err, target)
 		return err
 	}
-	defer res.Body.Close()
-	v.contentLength = float64(res.ContentLength)
-	if res.StatusCode != http.StatusOK {
-		log.Printf("reading answer: non 200[code=%v] status code received: '%s'", res.StatusCode, err)
+	defer resp.Body.Close()
+	v.contentLength = float64(resp.ContentLength)
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("reading answer: non 200[code=%v] status code received: '%s'", resp.StatusCode, err)
 		return errors.New("non 200 status code received")
 	}
 	err = os.MkdirAll(filepath.Dir(destFile), 0755)
@@ -236,9 +240,9 @@ func (v *Video) videoDownloadWorker(destFile string, target string) error {
 		return err
 	}
 	mw := io.MultiWriter(out, v)
-	_, err = io.Copy(mw, res.Body)
+	_, err = io.Copy(mw, resp.Body)
 	if err != nil {
-		log.Println("download video error: ", err)
+		v.log(fmt.Sprintln("download video error: ", err))
 		return err
 	}
 	return nil
