@@ -32,8 +32,8 @@ func getEnvValue(v string) string {
 }
 
 func main() {
-	var err error
 	var v *Video
+	var err error
 	currentDir, err = filepath.Abs(filepath.Dir(getEnvValue("DIR")))
 	if err != nil {
 		log.Panic(err)

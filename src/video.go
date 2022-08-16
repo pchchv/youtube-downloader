@@ -64,10 +64,10 @@ func (v *Video) DecodeURL(url string) error {
 func (v *Video) Download(destDir string) error {
 	// Starting download video to specific address.
 	//download highest resolution on [0]
+	err := errors.New("Empty stream list")
 	destFile := filepath.Join(destDir, v.StreamList[0]["title"])
-	var err error
 	for _, val := range v.StreamList {
-		url := val["url"] + "&signature=" + val["sig"]
+		url := val["url"]
 		v.log(fmt.Sprintln("Download url=", url))
 		v.log(fmt.Sprintln("Download to file=", destFile))
 		err = v.videoDownloadWorker(destFile, url)
