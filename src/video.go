@@ -200,7 +200,7 @@ func (v *Video) getHTTPClient() (*http.Client, error) {
 	// setup a http client
 	httpTransport := &http.Transport{}
 	httpClient := &http.Client{Transport: httpTransport}
-	if len(v.Socks5Proxy) == 0 {
+	if len(v.Socks5Proxy) == 0 || v.Socks5Proxy == "0" {
 		v.log("Using http without proxy.")
 		return httpClient, nil
 	}
