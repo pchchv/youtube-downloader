@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -130,21 +131,20 @@ func (v *Video) parseVidoInfo() error {
 		return errors.New("no stream map found in the server's answer")
 	}
 	// Read each stream
-	var streams []stream
 	streamsList := strings.Split(streamMap[0], ",")
+	// Get video title and author.
+	title, author := getVideoTitleAuthor(answer)
+	// Get video download link
+	var streams []stream
 	for streamPos, streamRaw := range streamsList {
 		streamQry, err := url.ParseQuery(streamRaw)
 		if err != nil {
 			log.Println(fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", streamPos, err))
 			continue
 		}
-		var title string
-		var author string
-		if len(answer["title"]) > 0 {
-			title = answer["title"][0]
-		}
-		if len(answer["author"]) > 0 {
-			author = answer["author"][0]
+		if _, ok := streamQry["quality"]; !ok {
+			v.log(fmt.Sprintf("An empty video's stream's information: stream %d\n", streamPos))
+			continue
 		}
 		streams = append(streams, stream{
 			"quality": streamQry["quality"][0],
@@ -244,4 +244,26 @@ func (v *Video) log(logText string) {
 	if v.Debug {
 		log.Println(logText)
 	}
+}
+
+func getVideoTitleAuthor(in url.Values) (string, string) {
+	playResponse, ok := in["player_response"]
+	if !ok {
+		return "", ""
+	}
+	personMap := make(map[string]interface{})
+
+	if err := json.Unmarshal([]byte(playResponse[0]), &personMap); err != nil {
+		panic(err)
+	}
+
+	s := personMap["videoDetails"]
+	myMap := s.(map[string]interface{})
+	if title, ok := myMap["title"]; ok {
+		if author, ok := myMap["author"]; ok {
+			return title.(string), author.(string)
+		}
+	}
+
+	return "", ""
 }
