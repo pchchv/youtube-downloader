@@ -127,21 +127,27 @@ func (v *Video) parseVidoInfo() error {
 			log.Println(fmt.Errorf("An error occured while decoding one of the video's stream's information: stream %d: %s", streamPos, err))
 			continue
 		}
-		var sig string
-		if _, exist := streamQry["sig"]; exist {
-			sig = streamQry["sig"][0]
+		var title string
+		var author string
+		if len(answer["title"]) > 0 {
+			title = answer["title"][0]
+		}
+		if len(answer["author"]) > 0 {
+			author = answer["author"][0]
 		}
 		streams = append(streams, stream{
 			"quality": streamQry["quality"][0],
 			"type":    streamQry["type"][0],
 			"url":     streamQry["url"][0],
-			"sig":     sig,
-			"title":   answer["title"][0],
-			"author":  answer["author"][0],
+			"title":   title,
+			"author":  author,
 		})
 		v.log(fmt.Sprintf("Stream found: quality '%s', format '%s'", streamQry["quality"][0], streamQry["type"][0]))
 	}
 	v.StreamList = streams
+	if len(v.StreamList) == 0 {
+		return errors.New(fmt.Sprint("no stream list found in the server's answer"))
+	}
 	return nil
 }
 
