@@ -181,7 +181,7 @@ func (v *Video) Write(p []byte) (n int, err error) {
 	return
 }
 
-func (v *Video) videoDownloadWorker(dstFile string, target string) error {
+func (v *Video) videoDownloadWorker(destFile string, target string) error {
 	res, err := http.Get(target)
 	if err != nil {
 		log.Printf("Http.Get\nerror: %s\ntarget: %s\n", err, target)
@@ -193,11 +193,11 @@ func (v *Video) videoDownloadWorker(dstFile string, target string) error {
 		log.Printf("reading answer: non 200[code=%v] status code received: '%s'", res.StatusCode, err)
 		return errors.New("non 200 status code received")
 	}
-	err = os.MkdirAll(filepath.Dir(dstFile), 0755)
+	err = os.MkdirAll(filepath.Dir(destFile), 0755)
 	if err != nil {
 		return err
 	}
-	out, err := os.Create(dstFile)
+	out, err := os.Create(destFile)
 	if err != nil {
 		return err
 	}
