@@ -94,7 +94,6 @@ func (v *Video) findVideoId(url string) error {
 }
 
 func (v *Video) parseVidoInfo() error {
-	var streams []stream
 	answer, err := url.ParseQuery(v.info) // ERROR: Empty answer!
 	if err != nil {
 		return err
@@ -120,6 +119,7 @@ func (v *Video) parseVidoInfo() error {
 		return errors.New("no stream map found in the server's answer")
 	}
 	// Read each stream
+	var streams []stream
 	streamsList := strings.Split(streamMap[0], ",")
 	for streamPos, streamRaw := range streamsList {
 		streamQry, err := url.ParseQuery(streamRaw)
@@ -131,15 +131,14 @@ func (v *Video) parseVidoInfo() error {
 		if _, exist := streamQry["sig"]; exist {
 			sig = streamQry["sig"][0]
 		}
-		stream := stream{
+		streams = append(streams, stream{
 			"quality": streamQry["quality"][0],
 			"type":    streamQry["type"][0],
 			"url":     streamQry["url"][0],
 			"sig":     sig,
 			"title":   answer["title"][0],
 			"author":  answer["author"][0],
-		}
-		streams = append(streams, stream)
+		})
 		v.log(fmt.Sprintf("Stream found: quality '%s', format '%s'", streamQry["quality"][0], streamQry["type"][0]))
 	}
 	v.StreamList = streams
@@ -188,7 +187,7 @@ func (v *Video) videoDownloadWorker(dstFile string, target string) error {
 		log.Printf("reading answer: non 200[code=%v] status code received: '%s'", res.StatusCode, err)
 		return errors.New("non 200 status code received")
 	}
-	err = os.MkdirAll(filepath.Dir(dstFile), 666)
+	err = os.MkdirAll(filepath.Dir(dstFile), 0755)
 	if err != nil {
 		return err
 	}
