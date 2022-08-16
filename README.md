@@ -4,5 +4,5 @@
 #
 ### Example application usage
 ```
-go run . -url https://www.youtube.com/watch?v=K06NrPp61cg
+go run . -url https://www.youtube.com/watch?v=K06NrPp61cg -p true
 ```

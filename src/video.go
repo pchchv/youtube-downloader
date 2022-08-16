@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"golang.org/x/net/proxy"
 )
 
 func SetLogOutput(w io.Writer) {
@@ -24,6 +26,10 @@ func NewVideo(debug bool) *Video {
 	return &Video{Debug: debug, DownloadPercent: make(chan int64, 100)}
 }
 
+func NewVideoWithSocks5Proxy(debug bool, socks5Proxy string) *Video {
+	return &Video{Debug: debug, DownloadPercent: make(chan int64, 100), Socks5Proxy: socks5Proxy}
+}
+
 type stream map[string]string
 
 type Video struct {
@@ -32,6 +38,7 @@ type Video struct {
 	info              string
 	StreamList        []stream
 	DownloadPercent   chan int64
+	Socks5Proxy       string
 	contentLength     float64
 	totalWrittenBytes float64
 	downloadLevel     float64
@@ -183,6 +190,25 @@ func (v *Video) Write(p []byte) (n int, err error) {
 		v.DownloadPercent <- int64(v.downloadLevel)
 	}
 	return
+}
+
+func (v *Video) getHTTPClient() (*http.Client, error) {
+	// setup a http client
+	httpTransport := &http.Transport{}
+	httpClient := &http.Client{Transport: httpTransport}
+	if len(v.Socks5Proxy) == 0 {
+		v.log("Using http without proxy.")
+		return httpClient, nil
+	}
+	dialer, err := proxy.SOCKS5("tcp", v.Socks5Proxy, nil, proxy.Direct)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "can't connect to the proxy:", err)
+		return nil, err
+	}
+	// set our socks5 as the dialer
+	httpTransport.Dial = dialer.Dial
+	v.log(fmt.Sprintf("Using http with proxy %s.", v.Socks5Proxy))
+	return httpClient, nil
 }
 
 func (v *Video) videoDownloadWorker(destFile string, target string) error {

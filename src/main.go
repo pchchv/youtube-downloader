@@ -12,6 +12,7 @@ import (
 var (
 	URL        string
 	currentDir string
+	Proxy      bool
 )
 
 func init() {
@@ -32,6 +33,7 @@ func getEnvValue(v string) string {
 
 func main() {
 	var err error
+	var v *Video
 	currentDir, err = filepath.Abs(filepath.Dir(getEnvValue("DIR")))
 	if err != nil {
 		log.Panic(err)
@@ -42,7 +44,12 @@ func main() {
 	if URL == "" {
 		log.Panic("ERROR! Wrong URL!")
 	}
-	v := NewVideo(true)
+	flag.BoolVar(&Proxy, "p", false, "Use the Socks 5 Proxy?")
+	if Proxy {
+		v = NewVideoWithSocks5Proxy(true, getEnvValue("PROXY"))
+	} else {
+		v = NewVideoWithSocks5Proxy(true, "")
+	}
 	err = v.DecodeURL(URL)
 	if err != nil {
 		log.Panic(err)
