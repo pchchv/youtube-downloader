@@ -15,10 +15,12 @@ import (
 )
 
 func SetLogOutput(w io.Writer) {
+	// Set logger writer
 	log.SetOutput(w)
 }
 
 func NewVideo(debug bool) *Video {
+	// Initialize youtube package object
 	return &Video{Debug: debug, DownloadPercent: make(chan int64, 100)}
 }
 
@@ -36,6 +38,7 @@ type Video struct {
 }
 
 func (v *Video) DecodeURL(url string) error {
+	// Decode youtube URL to retrieval video information.
 	err := v.findVideoId(url)
 	if err != nil {
 		return fmt.Errorf("findvideoID error=%s", err)
@@ -52,6 +55,7 @@ func (v *Video) DecodeURL(url string) error {
 }
 
 func (v *Video) Download(destDir string) error {
+	// Starting download video to specific address.
 	//download highest resolution on [0]
 	destFile := filepath.Join(destDir, v.StreamList[0]["title"])
 	var err error
