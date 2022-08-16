@@ -40,11 +40,11 @@ func main() {
 	}
 	log.Println("Download to dir =", currentDir)
 	flag.StringVar(&URL, "url", "", "")
+	flag.BoolVar(&Proxy, "p", false, "Use the Socks 5 Proxy?")
 	flag.Parse()
 	if URL == "" {
 		log.Panic("ERROR! Wrong URL!")
 	}
-	flag.BoolVar(&Proxy, "p", false, "Use the Socks 5 Proxy?")
 	if Proxy {
 		v = NewVideoWithSocks5Proxy(true, getEnvValue("PROXY"))
 	} else {
