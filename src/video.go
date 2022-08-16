@@ -165,15 +165,19 @@ func (v *Video) parseVidoInfo() error {
 func (v *Video) getVideoInfo() error {
 	url := "http://youtube.com/get_video_info?video_id=" + v.Id
 	v.log(fmt.Sprintf("url: %s", url))
-	res, err := http.Get(url)
+	httpClient, err := v.getHTTPClient()
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
+	resp, err := httpClient.Get(url)
+	if err != nil {
 		return err
 	}
-	body, err := ioutil.ReadAll(res.Body)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
