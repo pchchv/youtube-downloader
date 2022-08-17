@@ -1,11 +1,16 @@
 package main
 
-type Video struct {
-	ID   string
-	Itag int  // Video format by Itag number
-	mp3  bool // Extract MP3 audio using ffmpeg
-}
+import (
+	"flag"
+	"log"
+)
+
+var URL string
 
 func main() {
-
+	flag.StringVar(&URL, "url", "", "YouTube video url")
+	flag.Parse()
+	if URL == "" {
+		log.Panic("ERROR! Wrong URL!")
+	}
 }
