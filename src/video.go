@@ -55,7 +55,7 @@ func (v *Video) DecodeURL(url string) error {
 	if err != nil {
 		return fmt.Errorf("getVideoInfo error=%s", err)
 	}
-	err = v.parseVidoInfo()
+	err = v.parseVideoInfo()
 	if err != nil {
 		return fmt.Errorf("parse video info failed, err=%s", err)
 	}
@@ -105,8 +105,8 @@ func (v *Video) findVideoId(url string) error {
 	return nil
 }
 
-func (v *Video) parseVidoInfo() error {
-	answer, err := url.ParseQuery(v.info) // ERROR: Empty answer!
+func (v *Video) parseVideoInfo() error {
+	answer, err := url.ParseQuery(v.info)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (v *Video) parseVidoInfo() error {
 }
 
 func (v *Video) getVideoInfo() error {
-	url := "http://youtube.com/get_video_info?video_id=" + v.Id
+	url := "http://youtube.com/get_video_info?video_id=" + v.Id // WRONG URL!
 	v.log(fmt.Sprintf("url: %s", url))
 	httpClient, err := v.getHTTPClient()
 	if err != nil {
